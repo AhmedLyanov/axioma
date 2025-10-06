@@ -1,0 +1,17 @@
+# Исходники, которые не нужны пользователям
+src/
+examples/
+example.ts
+
+# Конфиги и метаданные
+tsconfig.json
+package-lock.json
+*.log
+
+# IDE и редакторы
+.vscode/
+.idea/
+
+# Git файлы
+.git/
+.gitignore

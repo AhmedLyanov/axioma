@@ -1,0 +1,48 @@
+{
+  "name": "axioma",
+  "version": "1.0.2",
+  "description": "AI-powered code generation library and CLI tool for interacting with AI models",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "bin": {
+    "axioma": "./dist/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "npm run build && node dist/example.js",
+    "example:choice": "npm run build && node dist/examples/choice.js",
+    "example:response": "npm run build && node dist/examples/response.js",
+    "example:json": "npm run build && node dist/examples/json.js",
+    "example:generate": "npm run build && node dist/examples/code-generation.js",
+    "cli": "npm run build && node dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmedLyanov/axioma.git"
+  },
+  "keywords": [
+    "ai",
+    "neural",
+    "network",
+    "code-generation",
+    "cli",
+    "productivity",
+    "developer-tools"
+  ],
+  "author": "DevAhmed",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "bugs": {
+    "url": "https://github.com/AhmedLyanov/axioma/issues"
+  },
+  "homepage": "https://github.com/AhmedLyanov/axioma#readme"
+}
