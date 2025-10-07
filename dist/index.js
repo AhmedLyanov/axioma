@@ -51,7 +51,7 @@ export default class Axioma {
             };
         }
         catch (err) {
-            console.error('Ошибка парсинга вывода ИИ:', err);
+            console.error('Error parsing AI output:', err);
             return null;
         }
     }
@@ -116,8 +116,8 @@ export default class Axioma {
             }
         }
         const explanationMarkers = [
-            '\nЭтот код', '\nДанный код', '\nКомпонент', '\nФункция',
-            '\nПримечание', '\nВажно:', '\nNote:', '\nThis code'
+            '\nThis code', '\nThe code', '\nComponent', '\nFunction',
+            '\nNote:', '\nImportant:', '\nThis function'
         ];
         for (const marker of explanationMarkers) {
             const index = cleanedContent.indexOf(marker);
@@ -162,48 +162,48 @@ export default class Axioma {
                     if (stat.isDirectory() && file !== 'node_modules' && file !== '.git') {
                         findTZFiles(filePath);
                     }
-                    else if (file === 'ТЗ.txt' || file === 'tz.txt' || file === 'specification.txt') {
+                    else if (file === 'TZ.txt' || file === 'tz.txt' || file === 'specification.txt') {
                         tzFiles.push(filePath);
                     }
                 }
             }
             findTZFiles(projectPath);
             if (tzFiles.length === 0) {
-                console.log('❌ Файлы ТЗ.txt не найдены в проекте');
+                console.log('TZ.txt files not found in project');
                 return;
             }
-            console.log(`📋 Найдено файлов ТЗ: ${tzFiles.length}`);
+            console.log(`Found TZ files: ${tzFiles.length}`);
             let tzContent = '';
             for (const tzFile of tzFiles) {
-                console.log(`📖 Читаем файл: ${tzFile}`);
+                console.log(`Reading file: ${tzFile}`);
                 const content = fs.readFileSync(tzFile, 'utf-8');
-                tzContent += `\n\n=== Файл: ${tzFile} ===\n${content}`;
+                tzContent += `\n\n=== File: ${tzFile} ===\n${content}`;
             }
             const prompt = `
-На основе следующего технического задания создай полноценный код.
+Based on the following technical specification, create complete code.
 
 ${tzContent}
 
-Требования к коду:
-1. Должен быть рабочим и готовым к использованию.
-2. Должен соответствовать лучшим практикам.
-3. Код должен решать поставленные в ТЗ задачи.
+Code requirements:
+1. Must be working and ready to use.
+2. Must follow best practices.
+3. Code must solve the tasks specified in the specification.
 
-ВАЖНО: Верни ответ ТОЛЬКО в формате JSON без каких-либо пояснений, комментариев или дополнительного текста:
+IMPORTANT: Return response ONLY in JSON format without any explanations, comments or additional text:
 {
-  "code": "полный чистый код здесь (без комментариев)",
-  "filename": "рекомендуемое имя файла, например MyComponent.jsx",
-  "type": "тип технологии, например react, vue, python"
+  "code": "full clean code here (no comments)",
+  "filename": "recommended filename",
+  "type": "technology type, e.g. react, vue, python"
 }
 
-Пример JSON:
+JSON example:
 {
   "code": "import React from 'react'; ...",
-  "filename": "MyButton.jsx",
+  "filename": "component.jsx",
   "type": "react"
 }
 `;
-            console.log('🤖 Генерирую код с помощью AI...');
+            console.log('Generating code with AI...');
             const generatedCode = await this.query(prompt, {
                 model: "mistral",
                 seed: 123,
@@ -217,29 +217,29 @@ ${tzContent}
                     const finalOutputFile = outputFile || output.filename;
                     const outputPath = path.join(projectPath, finalOutputFile);
                     fs.writeFileSync(outputPath, output.code);
-                    console.log(`Код успешно сгенерирован!`);
-                    console.log(`Тип: ${output.type}`);
-                    console.log(`Файл: ${outputPath}`);
-                    console.log(`Размер: ${output.code.length} символов`);
-                    console.log('\nПревью кода:');
+                    console.log(`Code successfully generated!`);
+                    console.log(`Type: ${output.type}`);
+                    console.log(`File: ${outputPath}`);
+                    console.log(`Size: ${output.code.length} characters`);
+                    console.log('\nCode preview:');
                     console.log('='.repeat(50));
                     const preview = output.code.split('\n').slice(0, 10).join('\n');
                     console.log(preview);
                     if (output.code.split('\n').length > 10) {
-                        console.log('... (и еще ' + (output.code.split('\n').length - 10) + ' строк)');
+                        console.log('... (and ' + (output.code.split('\n').length - 10) + ' more lines)');
                     }
                     console.log('='.repeat(50));
                 }
                 else {
-                    console.log('❌ Не удалось распарсить вывод ИИ. Проверьте промпт.');
+                    console.log('Failed to parse AI output. Check the prompt.');
                 }
             }
             else {
-                console.log('Ошибка при генерации кода');
+                console.log('Error generating code');
             }
         }
         catch (error) {
-            console.error('Ошибка:', error.message);
+            console.error('Error:', error.message);
         }
     }
 }

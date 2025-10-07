@@ -1,6 +1,6 @@
 {
   "name": "axioma",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AI-powered code generation library and CLI tool for interacting with AI models",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,12 @@
   "author": "DevAhmed",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.7.7"
+    "axios": "^1.7.7",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "cli-spinners": "^3.3.0",
+    "figlet": "^1.9.3",
+    "ora": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
