@@ -1,4 +1,3 @@
-// index.ts
 import axios from "axios";
 export default class Axioma {
     constructor() {
@@ -18,7 +17,6 @@ export default class Axioma {
     }
     parseGeneratedOutput(generatedContent) {
         try {
-            // Пытаемся парсить как JSON (ИИ должен вернуть { "code": "...", "filename": "...", "type": "..." })
             const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
@@ -42,7 +40,6 @@ export default class Axioma {
                     };
                 }
             }
-            // Fallback: если не JSON, используем старый метод извлечения
             const fallbackType = this.detectContentTypeFallback(generatedContent);
             const fallbackCode = this.formatCodeFallback(generatedContent, fallbackType.type);
             const fallbackFilename = this.suggestFilenameFromContent(fallbackCode, fallbackType.type);
@@ -98,7 +95,6 @@ export default class Axioma {
     }
     formatCodeFallback(content, type) {
         let cleanedContent = content;
-        // Извлекаем блоки кода из Markdown
         const codeBlocks = content.match(/```(?:[\w]*)\n([\s\S]*?)```/g);
         if (codeBlocks && codeBlocks.length > 0) {
             cleanedContent = codeBlocks.map(block => {
@@ -106,7 +102,6 @@ export default class Axioma {
             }).join('\n\n');
         }
         else {
-            // Fallback: ищем начало кода
             const codeStarts = [
                 'import ', 'export ', 'function ', 'const ', 'let ', 'var ',
                 'class ', 'interface ', '<!DOCTYPE', '<html', 'def ', 'from ',
@@ -120,7 +115,6 @@ export default class Axioma {
                 }
             }
         }
-        // Удаляем объяснения
         const explanationMarkers = [
             '\nЭтот код', '\nДанный код', '\nКомпонент', '\nФункция',
             '\nПримечание', '\nВажно:', '\nNote:', '\nThis code'
@@ -135,12 +129,10 @@ export default class Axioma {
         return cleanedContent.trim();
     }
     suggestFilenameFromContent(code, type) {
-        // Простой fallback: извлекаем имя из кода (например, const MyComponent = ...)
         const componentMatch = code.match(/const\s+(\w+)/) || code.match(/class\s+(\w+)/) || code.match(/export\s+default\s+(\w+)/);
         if (componentMatch) {
             return `${componentMatch[1]}.${this.getExtension(type)}`;
         }
-        // Или по типу
         return `Generated.${this.getExtension(type)}`;
     }
     getExtension(type) {
@@ -216,7 +208,7 @@ ${tzContent}
                 model: "mistral",
                 seed: 123,
                 system: "You Senior Fullstack-Developer React, Vue, Angular, Fetch, API, REST API, Node.js, Python and more. Always respond with valid JSON only: {code, filename, type}. No explanations.",
-                temperature: 0.3, // Понижаем для стабильности JSON
+                temperature: 0.3,
                 json_response: true
             });
             if (generatedCode) {

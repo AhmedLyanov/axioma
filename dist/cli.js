@@ -6,7 +6,7 @@ async function main() {
     const client = new Axioma();
     if (command === 'generate' || command === 'gen') {
         const projectPath = args[1] || '.';
-        const outputFile = args[2]; // Теперь опционально, ИИ предложит своё имя
+        const outputFile = args[2];
         console.log('Запуск Axioma Code Generator...');
         await client.generateCodeFromTZ(projectPath, outputFile);
     }
@@ -28,7 +28,6 @@ async function main() {
             console.log('Укажите промпт для генерации кода');
             return;
         }
-        // Улучшение: для 'code' тоже используем JSON-формат для consistency
         const fullPrompt = `
 Генерируй код по запросу: ${prompt}
 
@@ -42,7 +41,6 @@ async function main() {
             json_response: true
         });
         if (response) {
-            // Пытаемся парсить JSON
             try {
                 const parsed = typeof response === 'string' ? JSON.parse(response) : response;
                 console.log('💻 Сгенерированный код:\n', parsed.code || response);

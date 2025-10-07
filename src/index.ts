@@ -254,14 +254,14 @@ ${tzContent}
 ВАЖНО: Верни ответ ТОЛЬКО в формате JSON без каких-либо пояснений, комментариев или дополнительного текста:
 {
   "code": "полный чистый код здесь (без комментариев)",
-  "filename": "рекомендуемое имя файла, например MyComponent.jsx",
+  "filename": "рекомендуемое имя файла",
   "type": "тип технологии, например react, vue, python"
 }
 
 Пример JSON:
 {
   "code": "import React from 'react'; ...",
-  "filename": "MyButton.jsx",
+  "filename": "component.jsx",
   "type": "react"
 }
 `;
