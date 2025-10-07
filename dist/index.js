@@ -15,39 +15,63 @@ export default class Axioma {
             return null;
         }
     }
-    parseGeneratedOutput(generatedContent) {
+    parseMultiFileOutput(generatedContent) {
         try {
             const jsonMatch = generatedContent.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
-                if (parsed.code && parsed.filename && parsed.type) {
+                if (parsed.files && Array.isArray(parsed.files)) {
+                    const files = [];
+                    for (const fileData of parsed.files) {
+                        if (fileData.code && fileData.filename) {
+                            const extMap = {
+                                react: 'jsx', vue: 'vue', angular: 'ts', html: 'html',
+                                css: 'css', python: 'py', nodejs: 'js', typescript: 'ts',
+                                javascript: 'js', json: 'json', md: 'md', txt: 'txt'
+                            };
+                            const type = fileData.type?.toLowerCase() || this.detectContentType(fileData.code);
+                            const extension = fileData.extension || extMap[type] || 'js';
+                            files.push({
+                                code: fileData.code,
+                                filename: fileData.filename,
+                                type: type,
+                                extension: extension,
+                                path: fileData.path
+                            });
+                        }
+                    }
+                    return {
+                        files,
+                        projectStructure: parsed.projectStructure,
+                        instructions: parsed.instructions
+                    };
+                }
+                if (parsed.code && parsed.filename) {
                     const extMap = {
-                        react: 'jsx',
-                        vue: 'vue',
-                        angular: 'ts',
-                        html: 'html',
-                        css: 'css',
-                        python: 'py',
-                        nodejs: 'js',
-                        typescript: 'ts',
+                        react: 'jsx', vue: 'vue', angular: 'ts', html: 'html',
+                        css: 'css', python: 'py', nodejs: 'js', typescript: 'ts',
                         javascript: 'js'
                     };
                     return {
-                        code: parsed.code,
-                        filename: parsed.filename,
-                        type: parsed.type.toLowerCase(),
-                        extension: extMap[parsed.type.toLowerCase()] || 'js'
+                        files: [{
+                                code: parsed.code,
+                                filename: parsed.filename,
+                                type: parsed.type?.toLowerCase() || 'javascript',
+                                extension: extMap[parsed.type?.toLowerCase()] || 'js'
+                            }]
                     };
                 }
             }
-            const fallbackType = this.detectContentTypeFallback(generatedContent);
-            const fallbackCode = this.formatCodeFallback(generatedContent, fallbackType.type);
+            const fallbackType = this.detectContentType(generatedContent);
+            const fallbackCode = this.formatCode(generatedContent, fallbackType.type);
             const fallbackFilename = this.suggestFilenameFromContent(fallbackCode, fallbackType.type);
             return {
-                code: fallbackCode,
-                filename: fallbackFilename,
-                type: fallbackType.type,
-                extension: fallbackType.extension
+                files: [{
+                        code: fallbackCode,
+                        filename: fallbackFilename,
+                        type: fallbackType.type,
+                        extension: fallbackType.extension
+                    }]
             };
         }
         catch (err) {
@@ -55,7 +79,7 @@ export default class Axioma {
             return null;
         }
     }
-    detectContentTypeFallback(content) {
+    detectContentType(content) {
         const contentLower = content.toLowerCase();
         if (contentLower.includes('react') &&
             (contentLower.includes('jsx') || contentLower.includes('tsx') ||
@@ -93,7 +117,7 @@ export default class Axioma {
         }
         return { type: 'javascript', extension: 'js' };
     }
-    formatCodeFallback(content, type) {
+    formatCode(content, type) {
         let cleanedContent = content;
         const codeBlocks = content.match(/```(?:[\w]*)\n([\s\S]*?)```/g);
         if (codeBlocks && codeBlocks.length > 0) {
@@ -137,15 +161,9 @@ export default class Axioma {
     }
     getExtension(type) {
         const extMap = {
-            react: 'jsx',
-            vue: 'vue',
-            angular: 'ts',
-            html: 'html',
-            css: 'css',
-            python: 'py',
-            nodejs: 'js',
-            typescript: 'ts',
-            javascript: 'js'
+            react: 'jsx', vue: 'vue', angular: 'ts', html: 'html',
+            css: 'css', python: 'py', nodejs: 'js', typescript: 'ts',
+            javascript: 'js', json: 'json', md: 'md'
         };
         return extMap[type.toLowerCase()] || 'js';
     }
@@ -162,14 +180,14 @@ export default class Axioma {
                     if (stat.isDirectory() && file !== 'node_modules' && file !== '.git') {
                         findTZFiles(filePath);
                     }
-                    else if (file === 'TZ.txt' || file === 'tz.txt' || file === 'specification.txt') {
+                    else if (file === 'TT.txt' || file === 'tt.txt' || file === 'specification.txt') {
                         tzFiles.push(filePath);
                     }
                 }
             }
             findTZFiles(projectPath);
             if (tzFiles.length === 0) {
-                console.log('TZ.txt files not found in project');
+                console.log('TT.txt files not found in project');
                 return;
             }
             console.log(`Found TZ files: ${tzFiles.length}`);
@@ -182,53 +200,89 @@ export default class Axioma {
             const prompt = `
 Based on the following technical specification, create complete code.
 
+TECHNICAL SPECIFICATION:
 ${tzContent}
 
-Code requirements:
-1. Must be working and ready to use.
-2. Must follow best practices.
-3. Code must solve the tasks specified in the specification.
+IMPORTANT REQUIREMENTS:
+1. Analyze if this requires multiple files (HTML+CSS+JS, React components, etc.)
+2. If multiple files are needed, create a complete project structure
+3. All code must be working and follow best practices
+4. Include necessary configuration files if needed
 
-IMPORTANT: Return response ONLY in JSON format without any explanations, comments or additional text:
+RESPONSE FORMAT:
+Return ONLY valid JSON. Choose one format:
+
+SINGLE FILE (if simple component):
 {
-  "code": "full clean code here (no comments)",
-  "filename": "recommended filename",
-  "type": "technology type, e.g. react, vue, python"
+  "code": "full code here",
+  "filename": "filename.extension", 
+  "type": "technology"
 }
 
-JSON example:
+MULTI-FILE (if project/website):
 {
-  "code": "import React from 'react'; ...",
-  "filename": "component.jsx",
-  "type": "react"
+  "files": [
+    {
+      "code": "code content 1",
+      "filename": "filename1.extension",
+      "type": "technology1",
+      "path": "optional/subpath" 
+    },
+    {
+      "code": "code content 2", 
+      "filename": "filename2.extension",
+      "type": "technology2"
+    }
+  ],
+  "projectStructure": ["file1", "folder/file2"],
+  "instructions": "Brief setup instructions"
 }
+
+EXAMPLES:
+For a website: HTML, CSS, JS files
+For React app: components, package.json, etc.
+For Python project: main.py, requirements.txt, etc.
 `;
             console.log('Generating code with AI...');
             const generatedCode = await this.query(prompt, {
                 model: "mistral",
                 seed: 123,
-                system: "You Senior Fullstack-Developer React, Vue, Angular, Fetch, API, REST API, Node.js, Python and more. Always respond with valid JSON only: {code, filename, type}. No explanations.",
+                system: `You are a Senior Fullstack Developer. Analyze the technical specification and create appropriate code. 
+        If it's a simple component, return single file. If it's a website/project, return multiple files with complete structure.
+        ALWAYS respond with valid JSON only. No explanations.`,
                 temperature: 0.3,
                 json_response: true
             });
             if (generatedCode) {
-                const output = this.parseGeneratedOutput(generatedCode);
-                if (output && output.code) {
-                    const finalOutputFile = outputFile || output.filename;
-                    const outputPath = path.join(projectPath, finalOutputFile);
-                    fs.writeFileSync(outputPath, output.code);
-                    console.log(`Code successfully generated!`);
-                    console.log(`Type: ${output.type}`);
-                    console.log(`File: ${outputPath}`);
-                    console.log(`Size: ${output.code.length} characters`);
-                    console.log('\nCode preview:');
-                    console.log('='.repeat(50));
-                    const preview = output.code.split('\n').slice(0, 10).join('\n');
-                    console.log(preview);
-                    if (output.code.split('\n').length > 10) {
-                        console.log('... (and ' + (output.code.split('\n').length - 10) + ' more lines)');
+                const output = this.parseMultiFileOutput(generatedCode);
+                if (output && output.files.length > 0) {
+                    console.log(`\nGenerated ${output.files.length} file(s):`);
+                    for (const file of output.files) {
+                        let filePath;
+                        if (outputFile && output.files.length === 1) {
+                            filePath = path.join(projectPath, outputFile);
+                        }
+                        else if (file.path) {
+                            const dirPath = path.join(projectPath, path.dirname(file.path));
+                            if (!fs.existsSync(dirPath)) {
+                                fs.mkdirSync(dirPath, { recursive: true });
+                            }
+                            filePath = path.join(projectPath, file.path, file.filename);
+                        }
+                        else {
+                            filePath = path.join(projectPath, file.filename);
+                        }
+                        fs.writeFileSync(filePath, file.code);
+                        console.log(`✓ Created: ${filePath} (${file.type})`);
                     }
-                    console.log('='.repeat(50));
+                    if (output.projectStructure) {
+                        console.log('\nProject structure:');
+                        output.projectStructure.forEach(item => console.log(`  📁 ${item}`));
+                    }
+                    if (output.instructions) {
+                        console.log('\nInstructions:', output.instructions);
+                    }
+                    console.log(`\nTotal: ${output.files.length} files created successfully!`);
                 }
                 else {
                     console.log('Failed to parse AI output. Check the prompt.');

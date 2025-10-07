@@ -15,9 +15,9 @@ export default class Axioma {
     private baseUrl;
     constructor();
     query(prompt: string, options?: QueryOptions): Promise<any>;
-    private parseGeneratedOutput;
-    private detectContentTypeFallback;
-    private formatCodeFallback;
+    private parseMultiFileOutput;
+    private detectContentType;
+    private formatCode;
     private suggestFilenameFromContent;
     private getExtension;
     generateCodeFromTZ(projectPath?: string, outputFile?: string): Promise<void>;

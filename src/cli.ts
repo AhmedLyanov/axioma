@@ -9,7 +9,6 @@ async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
 
-  // Show header only for help or if no command specified
   if (!command || command === 'help') {
     showHelp();
     return;
@@ -126,7 +125,7 @@ function showHelp(): void {
 Axioma CLI - AI-powered code generation tool
 
 Commands:
-  generate [path] [output]  - Generate code from TZ.txt files
+  generate [path] [output]  - Generate code from TT.txt files
   gen [path] [output]       - Short version of generate
   chat <prompt>             - Chat with AI
   code <prompt>             - Generate code from prompt
@@ -138,7 +137,7 @@ Examples:
   axioma chat "Write a function" - Ask AI a question
   axioma code "React button component" - Generate code
 
-Create TZ.txt file in your project for automatic code generation!
+Create TT.txt file in your project for automatic code generation!
   `);
 }
 
