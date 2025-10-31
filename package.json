@@ -1,6 +1,6 @@
 {
   "name": "axioma",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "AI-powered code generation library and CLI tool for interacting with AI models",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

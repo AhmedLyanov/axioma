@@ -73,7 +73,7 @@ Return ONLY JSON: { "code": "...", "filename": "...", "type": "..." }
     
     try {
       const response = await client.query(fullPrompt, {
-        model: "qwen-coder",
+        model: "gpt-5-nano",
         seed: 123,
         system: "You Senior Fullstack-Developer React, Vue, Angular, Fetch, API, REST API and more. Always respond with valid JSON only: {code, filename, type}. No explanations.",
         temperature: 0.3,
