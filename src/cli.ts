@@ -42,7 +42,7 @@ async function main() {
       });
       
       spinner.succeed('Response received!');
-      console.log('--->', response);
+      console.log('>', response);
       
     } catch (error: unknown) {
       spinner.fail('Error!');
